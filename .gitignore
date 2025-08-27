@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# AI assistant directories
+/.zencoder/
+/.qodo/
