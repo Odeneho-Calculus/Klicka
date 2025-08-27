@@ -1,0 +1,38 @@
+[2025-08-27 01:43:38.479] INFO/KlickaLogger: FileLogger initialized. Logs will be saved to: /storage/emulated/0/Documents/klicka/logs/klicka-2025-08-27.log
+[2025-08-27 01:43:38.501] INFO/MainActivity: Application started
+[2025-08-27 01:43:38.522] DEBUG/MainActivity: Status - Mic: false, Overlay: false, Accessibility: false, Overlay Running: false, Voice Running: false
+[2025-08-27 01:43:38.554] DEBUG/MainActivity: Status - Mic: false, Overlay: false, Accessibility: false, Overlay Running: false, Voice Running: false
+[2025-08-27 01:43:38.565] INFO/MainActivity: Auto-starting services - Permissions: Overlay=false, Mic=false, Accessibility=false, Services: Overlay=false, Voice=false
+[2025-08-27 01:43:38.574] DEBUG/MainActivity: Status - Mic: false, Overlay: false, Accessibility: false, Overlay Running: false, Voice Running: false
+[2025-08-27 01:44:12.436] DEBUG/MainActivity: Status - Mic: true, Overlay: true, Accessibility: false, Overlay Running: false, Voice Running: false
+[2025-08-27 01:44:12.472] DEBUG/MainActivity: Status - Mic: true, Overlay: true, Accessibility: false, Overlay Running: false, Voice Running: false
+[2025-08-27 01:44:12.488] DEBUG/MainActivity: Status - Mic: true, Overlay: true, Accessibility: false, Overlay Running: false, Voice Running: false
+[2025-08-27 01:44:12.504] INFO/MainActivity: Auto-starting services - Permissions: Overlay=true, Mic=true, Accessibility=false, Services: Overlay=false, Voice=false
+[2025-08-27 01:44:12.518] INFO/MainActivity: Auto-starting voice service
+[2025-08-27 01:44:12.541] DEBUG/MainActivity: Status - Mic: true, Overlay: true, Accessibility: false, Overlay Running: false, Voice Running: false
+[2025-08-27 01:44:12.656] INFO/KlickaLogger: FileLogger initialized. Logs will be saved to: /storage/emulated/0/Documents/klicka/logs/klicka-2025-08-27.log
+[2025-08-27 01:44:12.670] INFO/VoiceService: Voice recognition service created
+[2025-08-27 01:44:21.653] INFO/KlickaLogger: FileLogger initialized. Logs will be saved to: /storage/emulated/0/Documents/klicka/logs/klicka-2025-08-27.log
+[2025-08-27 01:44:21.671] INFO/ClickService: Accessibility service connected
+[2025-08-27 01:44:21.692] INFO/ClickService: Loaded 0 click points
+[2025-08-27 01:44:21.704] INFO/ClickService: Registered accessibility button callback
+[2025-08-27 01:44:23.758] DEBUG/MainActivity: Status - Mic: true, Overlay: true, Accessibility: true, Overlay Running: false, Voice Running: true
+[2025-08-27 01:44:23.773] INFO/MainActivity: Auto-starting services - Permissions: Overlay=true, Mic=true, Accessibility=true, Services: Overlay=false, Voice=true
+[2025-08-27 01:44:23.779] INFO/MainActivity: Auto-starting overlay service
+[2025-08-27 01:44:23.817] DEBUG/ClickService: Updated mode UI to ADD mode
+[2025-08-27 01:44:23.855] DEBUG/MainActivity: Status - Mic: true, Overlay: true, Accessibility: true, Overlay Running: true, Voice Running: true
+[2025-08-27 01:44:36.929] INFO/VoiceService: Voice command recognized: 'click one'
+[2025-08-27 01:44:57.000] INFO/VoiceService: Voice command recognized: 'click one'
+[2025-08-27 01:45:25.750] INFO/VoiceService: Voice command recognized: 'click'
+[2025-08-27 01:45:25.815] INFO/VoiceService: Click all command received
+[2025-08-27 01:45:25.830] INFO/VoiceService: Found 1 markers with IDs: [1]
+[2025-08-27 01:45:25.843] INFO/VoiceService: Clicking all 1 markers
+[2025-08-27 01:45:25.854] INFO/ClickManager: Clicking 1 points
+[2025-08-27 01:45:25.885] INFO/ClickManager: Clicking point 1 at (237.0, 913.0)
+[2025-08-27 01:45:25.894] INFO/ClickService: Performing click at (237.0, 913.0) with duration 100ms
+[2025-08-27 01:45:26.025] DEBUG/ClickService: Click gesture completed at (237.0, 913.0)
+[2025-08-27 01:45:43.034] DEBUG/MainActivity: Status - Mic: true, Overlay: true, Accessibility: true, Overlay Running: true, Voice Running: true
+[2025-08-27 01:45:43.049] INFO/MainActivity: Auto-starting services - Permissions: Overlay=true, Mic=true, Accessibility=true, Services: Overlay=true, Voice=true
+[2025-08-27 01:45:43.062] DEBUG/MainActivity: Status - Mic: true, Overlay: true, Accessibility: true, Overlay Running: true, Voice Running: true
+[2025-08-27 01:45:44.620] DEBUG/ClickService: Updated mode UI to REMOVE mode
+[2025-08-27 01:45:45.735] DEBUG/ClickService: Updated mode UI to ADD mode

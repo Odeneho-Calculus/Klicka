@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.culustech.klicka.data.ClickPoint
+import com.culustech.klicka.log.FileLogger
 import com.culustech.klicka.service.ClickAccessibilityService
 
 /**
@@ -23,29 +24,45 @@ class ClickManager(private val context: Context) {
 
     fun clickOnce(points: List<ClickPoint>) {
         val svc = service() ?: return
+        FileLogger.i("ClickManager", "Clicking ${points.size} points")
         points.forEachIndexed { index, p ->
-            mainHandler.postDelayed({ svc.performClick(p.x, p.y, durationMs = 60) }, index * 120L)
+            mainHandler.postDelayed({
+                FileLogger.i("ClickManager", "Clicking point ${p.id} at (${p.x}, ${p.y})")
+                svc.performClick(p.x, p.y, durationMs = 100)
+            }, index * 300L)
         }
     }
 
     fun doubleClick(points: List<ClickPoint>) {
         val svc = service() ?: return
+        FileLogger.i("ClickManager", "Double-clicking ${points.size} points")
         points.forEachIndexed { index, p ->
-            val base = index * 220L
-            mainHandler.postDelayed({ svc.performClick(p.x, p.y, durationMs = 50) }, base)
-            mainHandler.postDelayed({ svc.performClick(p.x, p.y, durationMs = 50) }, base + 110L)
+            val base = index * 500L
+            mainHandler.postDelayed({
+                FileLogger.i("ClickManager", "First click on point ${p.id}")
+                svc.performClick(p.x, p.y, durationMs = 100)
+            }, base)
+            mainHandler.postDelayed({
+                FileLogger.i("ClickManager", "Second click on point ${p.id}")
+                svc.performClick(p.x, p.y, durationMs = 100)
+            }, base + 200L)
         }
     }
 
     fun clickPoint(point: ClickPoint) {
         val svc = service() ?: return
-        svc.performClick(point.x, point.y, durationMs = 60)
+        FileLogger.i("ClickManager", "Clicking single point ${point.id} at (${point.x}, ${point.y})")
+        svc.performClick(point.x, point.y, durationMs = 100)
     }
 
     fun doubleClickPoint(point: ClickPoint) {
         val svc = service() ?: return
-        svc.performClick(point.x, point.y, durationMs = 50)
-        mainHandler.postDelayed({ svc.performClick(point.x, point.y, durationMs = 50) }, 110L)
+        FileLogger.i("ClickManager", "Double-clicking point ${point.id}")
+        svc.performClick(point.x, point.y, durationMs = 100)
+        mainHandler.postDelayed({
+            FileLogger.i("ClickManager", "Second click on point ${point.id}")
+            svc.performClick(point.x, point.y, durationMs = 100)
+        }, 200L)
     }
 
     companion object {

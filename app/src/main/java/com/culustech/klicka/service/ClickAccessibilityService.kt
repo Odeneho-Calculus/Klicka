@@ -3,6 +3,7 @@ package com.culustech.klicka.service
 import android.accessibilityservice.AccessibilityButtonController
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
+import android.content.Intent
 import android.graphics.Path
 import android.graphics.PixelFormat
 import android.os.Build
@@ -18,6 +19,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.culustech.klicka.log.FileLogger
 import com.culustech.klicka.R
 import com.culustech.klicka.data.ClickPoint
 import com.culustech.klicka.data.ClickPointStore
@@ -35,7 +37,21 @@ class ClickAccessibilityService : AccessibilityService() {
     private lateinit var windowManager: WindowManager
     private var overlayView: View? = null
     private var overlayContainer: FrameLayout? = null
+    private var controlsView: View? = null
     private var addMode = true
+    private var markersVisible = true
+    private var controlsVisible = true
+
+    // Function to update UI based on add/remove mode
+    private fun updateModeUi() {
+        val modeText = controlsView?.findViewById<TextView>(R.id.mode_text) ?: return
+        val toggleMode = controlsView?.findViewById<ImageView>(R.id.btn_toggle_mode) ?: return
+
+        modeText.text = if (addMode) "ADD" else "REM"
+        toggleMode.setImageResource(if (addMode) android.R.drawable.ic_input_add else android.R.drawable.ic_delete)
+
+        FileLogger.d("ClickService", "Updated mode UI to ${if (addMode) "ADD" else "REMOVE"} mode")
+    }
 
     // Data
     private lateinit var store: ClickPointStore
@@ -47,11 +63,17 @@ class ClickAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         ClickManagerHolder.instance = this
 
+        // Initialize the file logger
+        FileLogger.getInstance().init()
+        FileLogger.i("ClickService", "Accessibility service connected")
+
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         store = ClickPointStore(this)
         points = store.loadPoints()
         // Ensure IDs are normalized to start at 1 and be sequential
         normalizeIds()
+
+        FileLogger.i("ClickService", "Loaded ${points.size} click points")
 
         // Register accessibility button if available (Android O+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -59,12 +81,16 @@ class ClickAccessibilityService : AccessibilityService() {
                 accessibilityButtonController.registerAccessibilityButtonCallback(
                     object : AccessibilityButtonController.AccessibilityButtonCallback() {
                         override fun onClicked(controller: AccessibilityButtonController) {
+                            FileLogger.d("ClickService", "Accessibility button clicked")
                             toggleOverlay()
                         }
                     },
                     mainHandler
                 )
-            } catch (_: Throwable) { /* ignore */ }
+                FileLogger.i("ClickService", "Registered accessibility button callback")
+            } catch (e: Throwable) {
+                FileLogger.e("ClickService", "Failed to register accessibility button", e)
+            }
         }
     }
 
@@ -74,16 +100,28 @@ class ClickAccessibilityService : AccessibilityService() {
     override fun onDestroy() {
         super.onDestroy()
         try { hideOverlay() } catch (_: Exception) {}
+        controlsView = null
         ClickManagerHolder.instance = null
     }
 
     // Public API for other components (e.g., Voice) to show overlay
     fun showOverlay() {
-        if (overlayView != null) return // already visible
+        if (overlayView != null) {
+            // If already visible, just make sure controls are visible
+            if (!controlsVisible) {
+                toggleControlsVisibility(true)
+            }
+            // If markers should be visible but aren't, show them
+            if (markersVisible && overlayContainer?.visibility == View.INVISIBLE) {
+                overlayContainer?.visibility = View.VISIBLE
+            }
+            return
+        }
 
         val inflater = LayoutInflater.from(this)
         val view = inflater.inflate(R.layout.overlay_bubble, null)
         overlayView = view
+        controlsView = view  // Store the controls view for later use
 
         val type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 
@@ -104,6 +142,8 @@ class ClickAccessibilityService : AccessibilityService() {
         val toggleMode = view.findViewById<ImageView>(R.id.btn_toggle_mode)
         val removeLast = view.findViewById<ImageView>(R.id.btn_remove_last)
         val clearAll = view.findViewById<ImageView>(R.id.btn_clear_all)
+        val doneButton = view.findViewById<ImageView>(R.id.btn_done)
+        val homeButton = view.findViewById<ImageView>(R.id.btn_home)
 
         // Fullscreen container to host markers
         overlayContainer = FrameLayout(this)
@@ -116,16 +156,17 @@ class ClickAccessibilityService : AccessibilityService() {
         )
         fullParams.gravity = Gravity.TOP or Gravity.START
 
-        val updateModeUi = {
-            modeText.text = if (addMode) "ADD" else "REM"
-            toggleMode.setImageResource(if (addMode) android.R.drawable.ic_input_add else android.R.drawable.ic_delete)
-        }
+        // Update the mode UI using our class method
         updateModeUi()
 
-        // Tap bubble toggles add/remove
+        // Tap bubble toggles controls visibility when in minimized mode
         bubble.setOnClickListener {
-            addMode = !addMode
-            updateModeUi()
+            if (controlsVisible) {
+                addMode = !addMode
+                updateModeUi()
+            } else {
+                toggleControlsVisibility(true)
+            }
         }
 
         // Drag bubble with edge snap + long-press to close
@@ -169,8 +210,12 @@ class ClickAccessibilityService : AccessibilityService() {
                             return true
                         }
                         if (!moved && dist < clickSlop) {
-                            addMode = !addMode
-                            updateModeUi()
+                            if (controlsVisible) {
+                                addMode = !addMode
+                                updateModeUi()
+                            } else {
+                                toggleControlsVisibility(true)
+                            }
                             return true
                         }
                         val screenWidth = resources.displayMetrics.widthPixels
@@ -203,10 +248,12 @@ class ClickAccessibilityService : AccessibilityService() {
             addMode = !addMode
             updateModeUi()
         }
+
         removeLast.setOnClickListener {
             removeLastMarker()
             counterText.text = points.size.toString()
         }
+
         clearAll.setOnClickListener {
             points.clear()
             store.clearPoints()
@@ -215,12 +262,78 @@ class ClickAccessibilityService : AccessibilityService() {
             Toast.makeText(this, "Cleared all markers", Toast.LENGTH_SHORT).show()
         }
 
+        // Done button - toggle markers visibility
+        doneButton.setOnClickListener {
+            if (markersVisible) {
+                hideMarkers()
+                doneButton.setImageResource(android.R.drawable.ic_menu_view)
+                Toast.makeText(this, "Markers hidden, ready for clicks", Toast.LENGTH_SHORT).show()
+            } else {
+                showMarkers()
+                doneButton.setImageResource(android.R.drawable.ic_menu_save)
+                Toast.makeText(this, "Markers visible", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Home button - minimize the overlay (hide controls but keep bubble)
+        homeButton.setOnClickListener {
+            toggleControlsVisibility(false)
+            Toast.makeText(this, "Controls minimized", Toast.LENGTH_SHORT).show()
+        }
+
         windowManager.addView(overlayContainer, fullParams)
         windowManager.addView(view, bubbleParams)
 
         // Render existing points
         points.forEach { renderMarker(it) }
         counterText.text = points.size.toString()
+
+        // Set initial visibility states
+        markersVisible = true
+        controlsVisible = true
+    }
+
+    /**
+     * Hides the markers but keeps the controls visible
+     * This allows clicks to be performed without the markers interfering
+     */
+    fun hideMarkers() {
+        markersVisible = false
+        overlayContainer?.visibility = View.INVISIBLE
+        // Don't hide controls - keep them visible
+    }
+
+    /**
+     * Shows the markers if they were hidden
+     */
+    fun showMarkers() {
+        markersVisible = true
+        overlayContainer?.visibility = View.VISIBLE
+    }
+
+    /**
+     * Shows or hides the control buttons, leaving only the main bubble visible
+     */
+    private fun toggleControlsVisibility(visible: Boolean) {
+        controlsVisible = visible
+        overlayView?.let { view ->
+            val controls = listOf(
+                R.id.points_counter,
+                R.id.mode_text,
+                R.id.btn_toggle_mode,
+                R.id.btn_remove_last,
+                R.id.btn_clear_all,
+                R.id.btn_done,
+                R.id.btn_home
+            )
+
+            controls.forEach { id ->
+                view.findViewById<View>(id).visibility = if (visible) View.VISIBLE else View.GONE
+            }
+
+            // Update layout after changing visibility
+            windowManager.updateViewLayout(view, view.layoutParams)
+        }
     }
 
     fun hideOverlay() {
@@ -228,6 +341,7 @@ class ClickAccessibilityService : AccessibilityService() {
         try { overlayView?.let { windowManager.removeView(it) } } catch (_: Exception) {}
         overlayContainer = null
         overlayView = null
+        controlsView = null
     }
 
     private fun toggleOverlay() {
@@ -364,10 +478,59 @@ class ClickAccessibilityService : AccessibilityService() {
 
     // ----- Click execution -----
     fun performClick(x: Float, y: Float, durationMs: Long = 50L) {
-        val path = Path().apply { moveTo(x, y) }
+        // Create a proper tap gesture with down and up events
+        val path = Path()
+        path.moveTo(x, y)
+
+        FileLogger.i("ClickService", "Performing click at ($x, $y) with duration ${durationMs}ms")
+
+        // Create a gesture with a clear start time and duration
+        val builder = GestureDescription.Builder()
         val stroke = GestureDescription.StrokeDescription(path, 0, durationMs)
-        val gesture = GestureDescription.Builder().addStroke(stroke).build()
-        dispatchGesture(gesture, null, null)
+        builder.addStroke(stroke)
+
+        // Dispatch with a callback to log success/failure
+        dispatchGesture(builder.build(), object : GestureResultCallback() {
+            override fun onCompleted(gestureDescription: GestureDescription) {
+                FileLogger.d("ClickService", "Click gesture completed at ($x, $y)")
+            }
+
+            override fun onCancelled(gestureDescription: GestureDescription) {
+                FileLogger.e("ClickService", "Click gesture cancelled at ($x, $y)")
+            }
+        }, null)
+    }
+
+    /**
+     * Check if the overlay is currently visible
+     */
+    fun isOverlayVisible(): Boolean {
+        return overlayView != null
+    }
+
+    /**
+     * Check if there are any click points defined
+     */
+    fun hasClickPoints(): Boolean {
+        return points.isNotEmpty()
+    }
+
+    /**
+     * Get the number of click points defined
+     */
+    fun getClickPointCount(): Int {
+        return points.size
+    }
+
+    /**
+     * Set the overlay to add or remove mode
+     */
+    fun setAddMode(enabled: Boolean) {
+        if (addMode != enabled) {
+            addMode = enabled
+            updateModeUi()
+            FileLogger.i("ClickService", "Set add mode to $enabled")
+        }
     }
 
     companion object ClickManagerHolder {
