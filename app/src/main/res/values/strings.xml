@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Klicka</string>
+    <string name="accessibility_service_description">Klicka accessibility service for automated taps</string>
+</resources>

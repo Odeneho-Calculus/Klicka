@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="12dp"/>
+
+    <Button
+        android:id="@+id/btn_request_permissions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Request Critical Permissions" />
+
+    <Button
+        android:id="@+id/btn_open_accessibility"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Accessibility Settings"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btn_start_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Overlay"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btn_start_voice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Voice"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btn_open_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Settings"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>

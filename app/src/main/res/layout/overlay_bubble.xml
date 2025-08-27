@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="@android:color/transparent">
+
+    <ImageView
+        android:id="@+id/bubble_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@mipmap/ic_launcher_round"
+        android:contentDescription="Overlay bubble" />
+
+    <TextView
+        android:id="@+id/points_counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_marginStart="8dp"/>
+
+    <TextView
+        android:id="@+id/mode_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ADD"
+        android:layout_marginStart="8dp"
+        android:textSize="12sp"/>
+
+    <ImageView
+        android:id="@+id/btn_toggle_mode"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@android:drawable/ic_input_add"
+        android:contentDescription="Toggle add/remove mode"
+        android:layout_marginStart="6dp"/>
+
+    <ImageView
+        android:id="@+id/btn_remove_last"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@android:drawable/ic_menu_delete"
+        android:contentDescription="Remove last"
+        android:layout_marginStart="6dp"/>
+
+    <ImageView
+        android:id="@+id/btn_clear_all"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription="Clear all markers"
+        android:layout_marginStart="6dp"/>
+
+</LinearLayout>
